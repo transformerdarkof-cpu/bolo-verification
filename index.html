@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>የመረጃ ማረጋገጫ ፖርታል | AIS ID Verification</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: #0d47a1;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            width: 90%;
+            flex: 1;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: #0d47a1;
+        }
+
+        button {
+            padding: 12px 20px;
+            background-color: #0d47a1;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #1565c0;
+        }
+
+        .result-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 20px;
+            background-color: #fafafa;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            background-color: #2e7d32;
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .info-value {
+            color: #222;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #eceff1;
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>የማረጋገጫ ፖርታል (Verification Portal)</h1>
+        <p>AIS ID Check & QR Code Verification System</p>
+    </header>
+
+    <div class="container">
+        <div class="search-box">
+            <input type="text" id="idInput" placeholder="የመታወቂያ/ID ቁጥር እዚህ ያስገቡ...">
+            <button onclick="checkID()">አረጋግጥ</button>
+        </div>
+
+        <div id="resultArea" class="result-card">
+            <div class="status-badge" id="statusBadge">የተረጋገጠ / Verified</div>
+            
+            <div class="info-row">
+                <span class="info-label">የአገልግሎት ዓይነት (Type):</span>
+                <span class="info-value" id="typeValue">AIS</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">የመታወቂያ ቁጥር (ID):</span>
+                <span class="info-value" id="idValue">በመፈለግ ላይ...</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">ሁኔታ (Status):</span>
+                <span class="info-value" style="color: green; font-weight: bold;">ትክክለኛ (Active)</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">የተረጋገጠበት ቀን:</span>
+                <span class="info-value" id="dateValue">--</span>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026. መብቱ በሕግ የተጠበቀ ነው። | Check QRCode System</p>
+    </footer>
+
+    <script>
+        // ገጹ ሲከፈት ከ URL ላይ parameters (ID እና Type) ለማንበብ
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const idParam = urlParams.get('ID');
+            const typeParam = urlParams.get('type') || 'AIS';
+
+            if (idParam) {
+                document.getElementById('idInput').value = idParam;
+                displayDetails(idParam, typeParam);
+            } else {
+                document.getElementById('idValue').textContent = 'እባክዎን ID ያስገቡ';
+                document.getElementById('dateValue').textContent = new Date().toLocaleDateString('am-ET');
+            }
+        };
+
+        function checkID() {
+            const idValue = document.getElementById('idInput').value;
+            if (idValue) {
+                displayDetails(idValue, 'AIS');
+            } else {
+                alert('እባክዎን የ ID ቁጥር ያስገቡ!');
+            }
+        }
+
+        function displayDetails(id, type) {
+            document.getElementById('idValue').textContent = id;
+            document.getElementById('typeValue').textContent = type;
+            document.getElementById('dateValue').textContent = new Date().toLocaleDateString();
+        }
+    </script>
+</body>
+</html>
